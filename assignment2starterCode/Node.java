@@ -15,7 +15,7 @@ public interface Node {
 
   /**
    * @return proposals to send to my followers. REMEMBER: After final round, behavior of
-   *         {@code getProposals} changes and it should return the transactions upon which
+   *         {@code sendToFollowers} changes and it should return the transactions upon which
    *         consensus has been reached.
    */
   Set<Transaction> sendToFollowers();

@@ -4,10 +4,8 @@
 // test your nodes. You will want to try creating some deviant nodes and
 // mixing them in the network to fully test.
 
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.HashMap;
+import java.io.*;
+import java.util.*;
 
 public class Simulation {
 
@@ -18,11 +16,12 @@ public class Simulation {
     // and numRounds (10, 20). You should try to test your CompliantNode
     // code for all 3x3x3x2 = 54 combinations.
 
-    int numNodes = 100;
-    double p_graph = Double.parseDouble(args[0]); // parameter for random graph: prob. that an edge will exist
-    double p_malicious = Double.parseDouble(args[1]); // prob. that a node will be set to be malicious
-    double p_txDistribution = Double.parseDouble(args[2]); // probability of assigning an initial transaction to each node 
-    int numRounds = Integer.parseInt(args[3]); // number of simulation rounds your nodes will run for
+    int numNodes = Integer.parseInt(args[0]);  // 100
+    int numTx = Integer.parseInt(args[1]);  // 500
+    double p_graph = Double.parseDouble(args[2]); // parameter for random graph: prob. that an edge will exist
+    double p_malicious = Double.parseDouble(args[3]); // prob. that a node will be set to be malicious
+    double p_txDistribution = Double.parseDouble(args[4]); // probability of assigning an initial transaction to each node 
+    int numRounds = Integer.parseInt(args[5]); // number of simulation rounds your nodes will run for
 
     // pick which nodes are malicious and which are compliant
     Node[] nodes = new Node[numNodes];
@@ -30,7 +29,7 @@ public class Simulation {
       if(Math.random() < p_malicious)
         // When you are ready to try testing with malicious nodes, replace the
         // instantiation below with an instantiation of a MaliciousNode
-        nodes[i] = new MalDoNothing(p_graph, p_malicious, p_txDistribution, numRounds);
+        nodes[i] = new MaliciousNode(p_graph, p_malicious, p_txDistribution, numRounds);
       else
         nodes[i] = new CompliantNode(p_graph, p_malicious, p_txDistribution, numRounds);
     }
@@ -51,8 +50,7 @@ public class Simulation {
     for (int i = 0; i < numNodes; i++)
       nodes[i].setFollowees(followees[i]);
 
-    // initialize a set of 500 valid Transactions with random ids
-    int numTx = 500;
+    // initialize a set of @numTx valid Transactions with random ids
     HashSet<Integer> validTxIds = new HashSet<Integer>();
     Random random = new Random();
     for (int i = 0; i < numTx; i++) {
@@ -112,8 +110,21 @@ public class Simulation {
     }
 
     // print results
+    HashMap<Set<Transaction>, Integer> non_empty_results =
+      new HashMap<Set<Transaction>, Integer>();
+    int num_consensus = 0;
+    HashSet<Transaction> consensus_set = null;
     for (int i = 0; i < numNodes; i++) {
       Set<Transaction> transactions = nodes[i].sendToFollowers();
+      if (!transactions.isEmpty()) {
+        int tmp_cnt = non_empty_results.get(transactions) == null
+                        ? 1 : non_empty_results.get(transactions) + 1;
+        non_empty_results.put(transactions, tmp_cnt);
+       if (tmp_cnt > num_consensus) {
+         num_consensus = tmp_cnt;
+         consensus_set = new HashSet<Transaction>(transactions);
+       }
+      }
       System.out.println("Transaction ids that Node " + i + " believes consensus on:");
       for (Transaction tx : transactions)
         System.out.println(tx.id);
@@ -121,8 +132,19 @@ public class Simulation {
       System.out.println();
     }
 
-  }
-
-
+    System.out.printf(
+        "Running test with parameters: numNodes = %d, numTx = %d, " +
+        "numRounds = %d, p_graph = %f, p_malicious = %f, p_txDistribution = %f\n",
+        numNodes, numTx, numRounds, p_graph, p_malicious, p_txDistribution);
+    System.out.printf(
+        "On average %d out of %d of nodes reach consensus.\n",
+        num_consensus, numNodes);
+    // Print HashSet<Transaction> in a pretty way for debugging.
+    System.out.println("Consensus set size = " + consensus_set.size());
+    System.out.println(
+        "Consensus set = " + Arrays.toString(consensus_set.toArray(
+                               new Transaction[consensus_set.size()])));
+  }  // main()
+ 
 }
 
