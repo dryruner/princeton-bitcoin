@@ -80,7 +80,6 @@ public class Simulation {
       // element of each array is the id of the transaction being proposed and the second
       // element is the index # of the node proposing the transaction.
       HashMap<Integer, Set<Candidate>> allProposals = new HashMap<>();
-
       for (int i = 0; i < numNodes; i++) {
         Set<Transaction> proposals = nodes[i].sendToFollowers();
         for (Transaction tx : proposals) {
@@ -101,7 +100,6 @@ public class Simulation {
 
         }
       }
-
       // Distribute the Proposals to their intended recipients as Candidates
       for (int i = 0; i < numNodes; i++) {
         if (allProposals.containsKey(i))
