@@ -1,3 +1,5 @@
+// This simulates a miner node: it can process a newly received block (from
+// other moniers), create a new block, or process a newly received transaction.
 
 import java.security.PublicKey;
 
@@ -10,7 +12,7 @@ public class BlockHandler {
   }
 
   /**
-   * add {@code block} to the block chain if it is valid.
+   * add {@code block} (from other miners') to the block chain if it is valid.
    * 
    * @return true if the block is valid and has been added, false otherwise
    */
@@ -20,7 +22,9 @@ public class BlockHandler {
     return blockChain.addBlock(block);
   }
 
-  /** create a new {@code block} over the max height {@code block} */
+  /** create a new {@code block} over the max height {@code block}
+   *  (mined by current node)
+   */
   public Block createBlock(PublicKey myAddress) {
     Block parent = blockChain.getMaxHeightBlock();
     byte[] parentHash = parent.getHash();
@@ -40,7 +44,7 @@ public class BlockHandler {
       return null;
   }
 
-  /** process a {@code Transaction} */
+  /** process a received {@code Transaction} */
   public void processTx(Transaction tx) {
     blockChain.addTransaction(tx);
   }
