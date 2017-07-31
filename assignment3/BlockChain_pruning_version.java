@@ -155,6 +155,8 @@ public class BlockChain {
       // if (header.height + 1) < maxHeight - CUT_OFF_AGE + 1, cut header block.
       if (header.height < getMaxHeight() - CUT_OFF_AGE) {
         for (BlockWrapper child : header.children) {
+          // Cutted-off header's children would become new common headers
+          // (Header of trees in the forest).
           new_headers.add(child);
         }
         hash_to_block_.remove(new ByteArrayWrapper(header.block.getHash()));
